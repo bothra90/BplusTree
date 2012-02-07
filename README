@@ -1,1 +1,63 @@
-Git Repo for assignment  - 1
+Write a C++ program to implement B+-tree operations, as per the following specifications. As discussed in class, the tree can store a record
+pointer, a list of record pointers, or an actual record; the implementation is agnostic to what is actually stored. We will call what is stored
+as the "payload", and all we care about is the length of the payload data. For this implementation, we assume that the key length and the
+payload length are fixed at index creation time, and are small enough so multiple keys and payloads fit in a node.
+
+enum attrType, with values intType and stringType for now.
+
+MaxAttrs is a constant, set to 16 struct KeyType with the following attributes int numAttrs, attrType attrTypes[MaxAttrs] and int attrLen[MaxAttrs] 
+
+int keylen(KeyType *keytype) returns the total length of the key int
+
+setIntAttrval(byte *key, KeyType *keytype, int attrnum, int val) key should be an array of bytes allocated already 
+
+int getIntAttrVal (byte *key, KeyType *keytype, int attrnum, int& retval)
+
+int setStringAttrVal(byte *key, KeyType, keytype, int attrnum, char *retval)
+
+int getStringAttrVal(byte *key, KeyType, keytype, int attrnum, char *retval) Note that retval should be allocated by the calling function and
+its address passed to the above function
+
+------------------------------------------------------------------------------------------------------------------------------------------
+class Index with member functions:
+
+Index(string indexname, KeyType *keytype, int payloadlen) This is the constructor. It constructs an index
+in a file whose name is specified in indexname. You can assume a fixed directory for all files. The keytype and payloadlen information, along
+with a pointer to the file offset of the root block of the tree, should be stored as a struct copied into the head of the index. 
+(Note that KeyType is of fixed length.)
+
+Index(String indexname) Opens an existing index, and retrieves the associated type/length information from the head of the index.  
+
+int insert(byte key[], byte payload[]) key comparison should be based on the type of the key specified earlier, and it should be easy to modify your
+code to add new types. You do NOT have to make this object oriented, you just need a switch on the key type insider your insert/lookup
+functions.  The index should only support non-duplicate keys. If a key is duplicated, insert should return 0, and not insert the duplicate.
+Otherwise a value of 1 is returned.
+
+int lookup(byte key[], byte payload[]) payload should be an array of bytes of the required size in which
+the retrieved payload is stored. The return value is 1 if the value is found, and 0 otherwise.
+--------------------------------------------------------------------------------------------------------------------------------------------
+The file can be assumed to have a 1 block header followed by data blocks. BLOCKSIZE is a #defined parameter. You can compute the maximum
+number of entries in an internal node from the key and block pointer (file offset) size, which you can assume to be 8 bytes. Similarly, for leaf
+nodes the maximum number of entries can be computed from the key size and the payload size.
+
+
+The data stored in a node can be organized as int numkeys, followed by a byte array (i.e. sequence of bytes) for storing keys, followed by a
+byte array for storing either pointers (for internal nodes), and payload (for leaf nodes).  The size of the byte arrays can be computed as
+keylen*maxkeys, pointersize*(maxkeys+1) and payloadlen*maxkeys.  Don't bother about the sibling pointer for leaf nodes.
+
+New blocks can be added by opening the file in append mode, and writing BLOCKSIZE bytes. The address (file offset) of the block can be
+computed by seeking to the end of the file and finding the position (see the website http://www.cplusplus.com/doc/tutorial/files/ for example).
+
+You do not have to implement deletion of records. As a side benefit, blocks never get freed, so you do not have to worry about keeping track of
+free blocks. (A real implementation would have to worry about these details, as also variable sized keys.)
+
+You should also implement a main program that tests your code as follows 
+
+The test function inserts (say) 10,000 randomly generated set of keys, whose associated payloads consist of the key followed by the characters "-ptr", and then generates the same set of random keys (using the same random number seed) and check that
+all the keys are retrieved properly.
+
+The key for testing should include at least one int and one string. To generate random integer values use
+the rand() function (see http://www.cplusplus.com/reference/clibrary/cstdlib/rand/ for example). To generate random strings, simply print the
+random number as a string of 10 characters using the C++ cstdio library function sprintf.
+
+For bonus points, implement a range lookup. [This is NOT mandatory, and bonus points will not allow you to exceed the maximum points for the assignment.]
