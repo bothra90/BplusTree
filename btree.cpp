@@ -63,6 +63,7 @@ Index::Index(string _indexname){
     maxKeys = (BLOCKSIZE - 1 - sizeof(int) - fmax(sizeof(payloadlen), 8)) / ( + keylen(KeyType) + fmax(sizeof(payloadlen), 8));
     // Load root node
     root = getRoot();
+    root -> parent = NULL;
   }
   else{
     printf("Unable to open file\n");
@@ -118,11 +119,22 @@ int Index::find_key(node * n, byte key[]){
   return -1;
 }
 
+void delete_node(node * n){
+  free(n -> keys);
+  free(n -> data);
+  free(n);
+  return;
+}
+
 int Index::lookup(byte key[], byte payload[]){
   if(root -> offset == NULL) return 0;
   node * curr = root;
+  long long int loc;
   while(!curr -> isLeaf){
-    curr = curr -> data[find_ptr(curr, key) * OFFSETSIZE];
+    loc = *(long long int *) (&curr -> data[find_ptr(curr, key) * OFFSETSIZE]);
+    file.seekg(loc);
+    delete_node(loc);
+    curr = fetchNode(loc);
   }
   // assert(curr -> isLeaf);
   int loc = find_key(curr, key);
@@ -130,9 +142,6 @@ int Index::lookup(byte key[], byte payload[]){
     return 0;
   else{
     memcpy(payload, &(curr -> data[loc * payloadlen]), payloadlen);
-    for(int i = 0;i < payloadlen;i++){
-      payload[i] = curr -> data[loc * payloadlen + i];
-    }
     return 1;
   }
 }

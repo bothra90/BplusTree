@@ -53,7 +53,7 @@ private:
   /*Helper Functions*/   
   node * getRoot();
   node * fetchNode(long long int offset);
-
+  void delete_node(node * n);
   
 public:
   /*
