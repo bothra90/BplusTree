@@ -53,8 +53,8 @@ free blocks. (A real implementation would have to worry about these details, as 
 
 You should also implement a main program that tests your code as follows 
 
-The test function inserts (say) 10,000 randomly generated set of keys, whose associated payloads consist of the key followed by the characters "-ptr", and then generates the same set of random keys (using the same random number seed) and check that
-all the keys are retrieved properly.
+The test function inserts (say) 10,000 randomly generated set of keys, whose associated payloads consist of the key followed by the characters
+"-ptr", and then generates the same set of random keys (using the same random number seed) and check that all the keys are retrieved properly.
 
 The key for testing should include at least one int and one string. To generate random integer values use
 the rand() function (see http://www.cplusplus.com/reference/clibrary/cstdlib/rand/ for example). To generate random strings, simply print the
