@@ -323,3 +323,17 @@ intIndex::insert(byte key[], byte payload[]){
   insert_key_in_node(currNode, key, payload); //  1 for leaf
   // memcpy(payload, &(currNode -> data[loc * payloadLen]), payloadLen);
 }
+
+int Index::insert(byte[] key, byte[] payload){
+  node * curr = root;
+  while (! (curr->isLeaf))
+  {
+    // get to the node where the payload has to be attached
+  }
+  if (numKeys < maxKeys){
+    //payload can be inserted at curr itself
+  }
+  else{
+    //split of the leaf node has to occur and propagated upwards into the tree
+  }
+}
