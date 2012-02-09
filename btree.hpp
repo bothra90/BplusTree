@@ -6,7 +6,7 @@
 #include<cstdlib>
 #include<cstdio>
 #include<iostream>
-
+#include<vector>
 #define INTSIZE 4
 #define MAXATTRS 16
 #define BLOCKSIZE 4096
@@ -27,7 +27,7 @@ typedef struct node_t{
   node * parent;
   long long int offset; // offset == 0 => node does not exist
   /*Following stored in index */   
-  bool isLeaf;
+  char isLeaf;
   int numKeys;
   byte * keys;
   byte * data; // Payload / Block Pointers(Offsets)
@@ -57,8 +57,14 @@ private:
   void delete_node(node * n);
   int find_key(node * n, byte key[]);
   int find_ptr(node * n, byte key[]);
-  node * create_new_node(long long int _offset, bool _isLeaf);
-  
+  int find_next_key(node * n, byte key[]);
+  node * create_new_node(long long int _offset, char _isLeaf);
+  void add_entry(node * n, byte * key, byte * payload);
+  void update_node(node * n);
+  void assert_filesz();
+  byte * split_node(node * src, node * dst);
+  void block_multiple(node * n);
+  void insert_key_in_node(node * currNode, byte * _key, byte * data);  
 public:
   /*
     It constructs an index in a file whose name is specified in indexname. You can assume a fixed directory for all files. The keytype and payloadlen information, along with a pointer to the file offset of the root block of the tree, should be stored as a struct copied into the head of the index. (Note that KeyType is of fixed length.)
