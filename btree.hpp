@@ -33,7 +33,7 @@ typedef struct node_t{
   byte * data; // Payload / Block Pointers(Offsets)
 } node;
 
-int keylen		(KeyType *keytype);
+int keyLength		(KeyType *keytype);
 int setIntAttrval	(byte *key, KeyType * keytype, int attrnum, int val);
 int getIntAttrVal	(byte *key, KeyType * keytype, int attrnum, int& retval);
 int setStringAttrVal	(byte *key, KeyType * keytype, int attrnum, char *val);
@@ -44,22 +44,26 @@ class Index{
 private:
   /* Index Variables*/ 
   KeyType * keytype;
-  int payloadlen;
+  int payloadLen;
   string indexname;
   fstream file;
   int maxKeys;
   node * root;
+  int keyLen;
 
   /*Helper Functions*/   
   node * getRoot();
   node * fetchNode(long long int offset);
   void delete_node(node * n);
+  int find_key(node * n, byte key[]);
+  int find_ptr(node * n, byte key[]);
+  node * create_new_node(long long int _offset, bool _isLeaf);
   
 public:
   /*
     It constructs an index in a file whose name is specified in indexname. You can assume a fixed directory for all files. The keytype and payloadlen information, along with a pointer to the file offset of the root block of the tree, should be stored as a struct copied into the head of the index. (Note that KeyType is of fixed length.)
   */   
-  Index(string _indexname, KeyType * _keytype, int _payloadlen);
+  Index(string _indexname, KeyType * _keytype, int _payloadLen);
   /*
     Opens an existing index, and retrieves the associated type/length information from the head of the index.  
    */

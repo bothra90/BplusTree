@@ -1,6 +1,8 @@
+#include<btree.hpp>
+
 using namespace std;
 
-int keylen(KeyType *keytype){
+int keyLength(KeyType *keytype){
   int total_size = 0;
   for(int i = 0; i < keytype->numAttrs; i++){
     total_size += (keytype->attrLen)[i];
