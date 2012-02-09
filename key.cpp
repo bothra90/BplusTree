@@ -62,8 +62,10 @@ int compareKeys(byte* key1, byte* key2, KeyType* keytype){
 
   //test
   
-  cout << "comparekeys: " << *(int *)key1 << ","<< *(int *)key2 <<","<< (char *)(key1 + 4) <<","<<(char *)(key2 + 4) << ","<<*(int *)(key1 + 12)\
+  if(DEBUG){
+    cout << "comparekeys: " << *(int *)key1 << ","<< *(int *)key2 <<","<< (char *)(key1 + 4) <<","<<(char *)(key2 + 4) << ","<<*(int *)(key1 + 12)\
     << "," << *(int *)(key2 + 12) << endl; 
+  }
   int i = 0;
   int offset1 = 0, offset2 = 0;
   while(i < keytype -> numAttrs){
@@ -89,7 +91,9 @@ int compareKeys(byte* key1, byte* key2, KeyType* keytype){
     }
     else if (keytype -> attrTypes[i] == stringType){
       int cmp = strcmp((char *)(key1 + offset1), (char *)(key2 + offset2));
-      cout << (char *)(key1 + offset1) << " " << (char *)(key2 + offset2) << " " << cmp << endl;
+      if(DEBUG){
+	cout << (char *)(key1 + offset1) << " " << (char *)(key2 + offset2) << " " << cmp << endl;
+      }
       if (cmp < 0)
       {
 	return -1;

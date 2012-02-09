@@ -11,7 +11,7 @@ Index::Index(string _indexname, KeyType * _keytype, int _payloadLen){
   keytype = _keytype;
   payloadLen = _payloadLen;
   keyLen = keyLength(keytype);
-  file.open(indexname.c_str(), ios::in|ios::binary| ios::out | ios::ate);
+  file.open(indexname.c_str(), fstream::in | fstream::out | fstream::binary | fstream::trunc);
   assert(file.is_open());
   maxKeys = (BLOCKSIZE - 1 - sizeof(int) - fmax(sizeof(payloadLen), OFFSETSIZE)) / (keyLen + fmax(sizeof(payloadLen), OFFSETSIZE));
   // Store keytype in first block
@@ -55,7 +55,7 @@ node * Index::fetchNode(long long int offset){
 
 Index::Index(string _indexname){
   indexname = _indexname;
-  file.open (indexname.c_str(), ios::in|ios::binary| ios::out); 
+  file.open(indexname.c_str(), ios::in|ios::binary| ios::out); 
   keytype = new KeyType;
 
   if (file.is_open()){
@@ -120,11 +120,15 @@ int Index::find_index(node * n, byte key[]){
       right = current;
     }
   }
-  cout << "index:" << *(int *)key <<","<< (char *)(key + 4) << "," << *(int *)(key + 12) << endl;
+  if(DEBUG){
+    cout << "index:" << *(int *)key <<","<< (char *)(key + 4) << "," << *(int *)(key + 12) << endl;
+  }
   // current = (left + right) / 2;
   // Note: key is strictly greater than left key
   currKey = &(n -> keys[KEY(right)]);
-  cout << "index:" << *(int *)currKey <<","<< (char *)(currKey + 4) << "," << *(int *)(currKey + 12) << endl;
+  if(DEBUG){
+    cout << "index:" << *(int *)currKey <<","<< (char *)(currKey + 4) << "," << *(int *)(currKey + 12) << endl;
+  }
   if(compareKeys(key, currKey,keytype) == 0){
     return current;
   }
@@ -149,7 +153,9 @@ int Index::find_next_key(node * n, byte key[]){
       right = current;
     }
   }
-  cout << right << endl;
+  if(DEBUG){
+    cout << right << endl;
+  }
   // New node to be stored on right node
   return right;
 }
@@ -236,9 +242,6 @@ void Index::assert_filesz(){
   Aligns given node to block size in file
  */ 
 void Index::block_multiple(){
-  file << flush;
-  file.close();
-  file.open(indexname.c_str(), ios::in|ios::binary| ios::out | ios::ate);
   file.seekg(0,ios::end);
   int length = file.tellg();
   int sz = BLOCKSIZE - (length) % BLOCKSIZE;
@@ -265,7 +268,9 @@ byte * Index::split_node(node * src, node ** dstp){
 }
 
 void Index::insert_key_in_node(node * currNode, byte * _key, byte * _data){
-  cout << "In insert"<< _data << endl;
+  if(DEBUG){
+    cout << "In insert"<< _data << endl;
+  }
   char isLeaf = currNode -> isLeaf;
   int keyIndex;
   int datasz = isLeaf ? payloadLen : OFFSETSIZE;
@@ -282,12 +287,18 @@ void Index::insert_key_in_node(node * currNode, byte * _key, byte * _data){
       currNode -> data[(i + 1)* datasz + j] = currNode -> data[i * datasz + j];
     }
   }
-  cout << "insert:" << *(int *)_key <<","<< (char *)(_key + 4) << "," << *(int *)(_key + 12) << endl;
-  cout <<"key Index for new data" << _data << endl << keyIndex << endl;
+  if(DEBUG){
+    cout << "insert:" << *(int *)_key <<","<< (char *)(_key + 4) << "," << *(int *)(_key + 12) << endl;
+    cout <<"key Index for new data" << _data << endl << keyIndex << endl;
+  }
   memcpy(&(currNode -> keys[keyIndex * keyLen]), _key, keyLen);
-  cout << "insert:" << *(int *)_key <<","<< (char *)(_key + 4) << "," << *(int *)(_key + 12) << endl;
+  if(DEBUG){
+    cout << "insert:" << *(int *)_key <<","<< (char *)(_key + 4) << "," << *(int *)(_key + 12) << endl;
+  }
   memcpy(&(currNode -> data[keyIndex * datasz]), _data, datasz);
-  cout << "insert:" << *(int *)_key <<","<< (char *)(_key + 4) << "," << *(int *)(_key + 12) << endl;
+  if(DEBUG){
+    cout << "insert:" << *(int *)_key <<","<< (char *)(_key + 4) << "," << *(int *)(_key + 12) << endl;
+  }
   currNode -> numKeys += 1;
     // Create new node at end of file
     

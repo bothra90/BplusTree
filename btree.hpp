@@ -8,10 +8,14 @@
 #include<iostream>
 #include<vector>
 #include <fstream>
+
 #define INTSIZE 4
 #define MAXATTRS 16
 #define BLOCKSIZE 128
 #define OFFSETSIZE 8
+
+//for Debugging purposes
+#define DEBUG 1
 
 using namespace std;
 

@@ -31,7 +31,9 @@ int main(){
   char pay[] = "a";
   foo->insert(key,pay);
 
-  cout << foo->maxKeys << endl;
+  if(DEBUG){
+    cout << foo->maxKeys << endl;
+  }
   byte * key1 = new byte[keylen];
   char str1[] = "awesome\0";
   insert_key(key1, 4, 12, str1);
