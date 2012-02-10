@@ -106,6 +106,7 @@ int Index::find_ptr(node * n, byte key[]){
 /*Finds key in a leaf node using binary search
   Returns key number to insert at
  */  
+// XXX why assume leaf? 
 int Index::find_index(node * n, byte key[]){
   // assert(n -> isLeaf);
   int left = 0, right = (n -> numKeys) - 1, current = (n -> numKeys) / 2;
@@ -137,7 +138,7 @@ int Index::find_index(node * n, byte key[]){
 
 /*Finds the place to store key*/   
 int Index::find_next_key(node * n, byte key[]){
-  assert(n -> isLeaf);
+  //assert(n -> isLeaf);
   int left = 0, right = n -> numKeys - 1, current = n -> numKeys / 2;
   byte * currKey ;
   currKey = &(n -> keys[KEY(right)]);
@@ -326,8 +327,10 @@ void Index::insert_key_in_node(node * currNode, byte * _key, byte * _data){
     block_multiple(); //Makes file blocksz multiple
     byte * d = new byte[OFFSETSIZE];
     memcpy(d, &(newNode -> offset), OFFSETSIZE);
-    //XXX seems currNode->parent is not set
-    printf("%p\n",currNode->parent); 
+    //TODO seems currNode->parent is not set
+    if(currNode -> parent == NULL){
+      create_new_node(BLOCKSIZE, 0, &currNode->parent); //XXX changed. but not working
+    }
     insert_key_in_node(currNode -> parent, newKey, d);
   }
 }
