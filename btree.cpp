@@ -1,5 +1,4 @@
 #include "btree.hpp"
-#include <fstream>
 #include <cmath>
 #include <cassert>
 #include <iostream>
@@ -264,6 +263,7 @@ byte * Index::split_node(node * src, node ** dstp){
   }
   dst -> numKeys = maxKeys - split;
   src -> numKeys = split;
+  *dstp = dst;
   return dst -> keys;
 }
 
@@ -271,7 +271,13 @@ void Index::insert_key_in_node(node * currNode, byte * _key, byte * _data){
   if(DEBUG){
     cout << "In insert"<< _data << endl;
   }
+  if(DEBUG){
+    cout <<"here1" << endl;
+  } 
   char isLeaf = currNode -> isLeaf;
+  if(DEBUG){
+    cout <<"here2" << endl;
+  } 
   int keyIndex;
   int datasz = isLeaf ? payloadLen : OFFSETSIZE;
   keyIndex = find_next_key(currNode, _key);
@@ -300,25 +306,27 @@ void Index::insert_key_in_node(node * currNode, byte * _key, byte * _data){
     cout << "insert:" << *(int *)_key <<","<< (char *)(_key + 4) << "," << *(int *)(_key + 12) << endl;
   }
   currNode -> numKeys += 1;
-    // Create new node at end of file
-    
-    // Store data in node construct
-    // Split Node
-    // a. Copy data from current node to new node
-    // b. Update keys count in current node
-    // _key contains first key of newnode
+  // Create new node at end of file
+
+  // Store data in node construct
+  // Split Node
+  // a. Copy data from current node to new node
+  // b. Update keys count in current node
+  // _key contains first key of newnode
   // newnode contains
   // c. Dump new node
 
   node * newNode = NULL;
   byte * newKey;
-  
+
   if(currNode -> numKeys == maxKeys){
     newKey = split_node(currNode, &newNode);
     update_node(&newNode); // Updates node in file
     block_multiple(); //Makes file blocksz multiple
     byte * d = new byte[OFFSETSIZE];
     memcpy(d, &(newNode -> offset), OFFSETSIZE);
+    //XXX seems currNode->parent is not set
+    printf("%p\n",currNode->parent);
     insert_key_in_node(currNode -> parent, newKey, d);
   }
 }
@@ -342,6 +350,7 @@ int Index::insert(byte key[], byte payload[]){
   int temp;
   while(!currNode -> isLeaf){
     temp = find_ptr(currNode, key);
+
     // chosen -> push_back(temp)
     loc = *(long long int *) (&currNode -> data[temp * OFFSETSIZE]);
     file.seekg(loc);
