@@ -1,7 +1,8 @@
-#include "btree.hpp"
+#include "btree.hpp" 
 #include <cmath>
 #include <cassert>
 #include <iostream>
+
 
 using namespace std;
 
@@ -263,7 +264,7 @@ byte * Index::split_node(node * src, node ** dstp){
   }
   dst -> numKeys = maxKeys - split;
   src -> numKeys = split;
-  *dstp = dst;
+  *dstp = dst; // FIXED here
   return dst -> keys;
 }
 
@@ -326,7 +327,7 @@ void Index::insert_key_in_node(node * currNode, byte * _key, byte * _data){
     byte * d = new byte[OFFSETSIZE];
     memcpy(d, &(newNode -> offset), OFFSETSIZE);
     //XXX seems currNode->parent is not set
-    printf("%p\n",currNode->parent);
+    printf("%p\n",currNode->parent); 
     insert_key_in_node(currNode -> parent, newKey, d);
   }
 }
