@@ -19,8 +19,8 @@ int main(){
   keytype->attrTypes[1] = stringType;
   keytype->attrTypes[2] = intType;
   keytype->attrLen[0] = INTSIZE;
+  keytype->attrLen[1] = 8; // 8 character string
   keytype->attrLen[2] = INTSIZE;
-  keytype->attrLen[1] = 7; // 8 character string
   int payloadLen = 2;
   Index * foo = new Index("foo",keytype, payloadLen);
   int keylen = keyLength(keytype);
@@ -49,7 +49,7 @@ int main(){
 
   byte * key3 = new byte[keylen];
   char str3[] = "awesom2";
-  insert_key(key3, 8, 32, str3);
+  insert_key(key3, 4, 32, str3);
   char pay3[] = "d";
   foo->insert(key3,pay3);
 

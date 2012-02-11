@@ -81,102 +81,6 @@ Index::Index(string _indexname){
   }
 }
 
-
-#define KEY(a) (a * keyLen)
-
-/*Finds pointer to follow in a node using binary search on key*/
-int Index::find_ptr(node * n, byte key[]){
-  int left = 0, right = n -> numKeys - 1, current = n -> numKeys / 2;
-  byte * key1,* currKey ;
-  key1 = &(n -> keys[KEY(right)]);
-  if(compareKeys(key, key1,keytype) > 0) return right + 1;
-  while((left + 1)< right){
-    current = (left + right) / 2;
-    currKey = &(n -> keys[KEY(current)]);
-    if(compareKeys(key, currKey,keytype) > 0){
-      left = current;
-    }
-    else{
-      right = current;
-    }
-  }
-  return left + 1;
-}
-
-/*Finds key in a leaf node using binary search
-  Returns key number to insert at
-  */  
-// XXX why assume leaf? 
-int Index::find_index(node * n, byte key[]){
-  // assert(n -> isLeaf);
-  int left = 0, right = (n -> numKeys) - 1, current = (n -> numKeys) / 2;
-  byte * key1,* currKey ;
-  while((left + 1)< right){
-    current = (left + right) / 2;
-    currKey = &(n -> keys[KEY(current)]);
-    if(compareKeys(key, currKey,keytype) > 0){
-      left = current;
-    }
-    else{
-      right = current;
-    }
-  }
-  if(DEBUG){
-    cout << "index:" << *(int *)key <<","<< (char *)(key + 4) << "," << *(int *)(key + 12) << endl;
-  }
-  // current = (left + right) / 2;
-  // Note: key is strictly greater than left key
-  currKey = &(n -> keys[KEY(right)]);
-  if(DEBUG){
-    cout << "index:" << *(int *)currKey <<","<< (char *)(currKey + 4) << "," << *(int *)(currKey + 12) << endl;
-  }
-  if(compareKeys(key, currKey,keytype) == 0){
-    return current;
-  }
-  return -1;
-}
-
-/*Finds the place to store key*/   
-int Index::find_next_key(node * n, byte key[]){
-  if (n -> numKeys == 0)
-    return 0;
-
-  int leftIndex = 0, rightIndex = n -> numKeys - 1, currIndex = (n -> numKeys) / 2;
-  byte *currKey, *leftKey, *rightKey;
-
-  rightKey = &(n->keys[KEY(rightIndex)]);
-  leftKey  = &(n->keys[KEY(leftIndex)]);
-  if(compareKeys(key, leftKey, keytype) < 0){
-    if(DEBUG){
-      cout << "Found index = " << leftIndex << endl;
-    }
-    return leftIndex;
-  }
-  else if(compareKeys(key, rightKey, keytype) > 0){
-    if(DEBUG){
-      cout << "Found index = " <<  rightIndex << endl;
-    }
-    return rightIndex;
-  }
-  else{
-    while(leftIndex + 1 < rightIndex){
-      currIndex = (leftIndex + rightIndex) / 2;
-      currKey = &(n -> keys[KEY(currIndex)]);
-      if(compareKeys(currKey, key, keytype) < 0){
-	leftIndex = currIndex;
-      }
-      else{
-	rightIndex = currIndex;
-      }
-    }
-
-    if(DEBUG){
-      cout << "Found index = " <<  rightIndex << endl;
-    }
-    return rightIndex;
-  }
-}
-
 void Index::delete_node(node * n){
   free(n -> keys);
   free(n -> data);
@@ -184,52 +88,17 @@ void Index::delete_node(node * n){
   return;
 }
 
-int Index::lookup(byte key[], byte payload[]){
-  if(root -> offset == 0){
-    cout << "No entries in index."<< endl;
-    return 0;
-  }
-  node * curr = root,* prev ;
-  long long int loc;
-  while(!curr -> isLeaf){
-    loc = *(long long int *) (&curr -> data[find_ptr(curr, key) * OFFSETSIZE]);
-    file.seekg(loc);
-    delete_node(curr);
-    curr = fetchNode(loc);
-  }
-  // assert(curr -> isLeaf);
-  int index = find_index(curr, key);
-  if(index == -1)
-    return 0;
-  else{
-    memcpy(payload, &(curr -> data[index * payloadLen]), payloadLen);
-    return 1;
-  }
-}
-
 void Index::create_new_node(long long int _offset, char _isLeaf, node **dst){
   node * ret = (node *)malloc(sizeof(node));
   ret -> offset = _offset;
   ret -> numKeys = 0;
   ret -> isLeaf = _isLeaf;
-  ret -> keys = (char *)malloc (maxKeys * keyLen);
-  if(_isLeaf) ret -> data = (char *)malloc(maxKeys * payloadLen);
-  else ret -> data = (char *)malloc(maxKeys * OFFSETSIZE);
+  ret -> keys = (char *)malloc(maxKeys * keyLen);
+  int datasz = _isLeaf? payloadLen : 8; //XXX
+  ret -> data = (char *)malloc((maxKeys + 1) * datasz);
   *dst = ret;
 }
 
-// Adds an entry to a node . XXX makes it the rightmost entry
-void Index::add_entry(node * n, byte * key, byte * _data){
-  int datasz = (n -> isLeaf)? payloadLen : OFFSETSIZE; //FIXED
-  memcpy(&(n -> keys[n -> numKeys * keyLen]), key, keyLen);
-  if(n -> isLeaf){
-    memcpy(&(n -> data[n -> numKeys * datasz]), _data, datasz);
-  }
-  else{
-    memcpy(&(n -> data[n -> numKeys * OFFSETSIZE]), _data, OFFSETSIZE);
-  }
-  n -> numKeys++;
-}
 
 /*
    Transfer the constructed node to its assigned position on the file
@@ -286,95 +155,129 @@ byte * Index::split_node(node * src, node ** dstp){
   return dst -> keys;
 }
 
+#define KEY(a) (a * keyLen)
+
+/*Finds the place to store key*/   
+int Index::find_next_key(node * n, byte key[]){
+  if (n -> numKeys == 0)
+    return 0;
+  int leftIndex = 0, rightIndex = n -> numKeys - 1, currIndex = (n -> numKeys) / 2;
+  byte *currKey, *leftKey, *rightKey;
+  rightKey = &(n->keys[KEY(rightIndex)]);
+  leftKey  = &(n->keys[KEY(leftIndex)]);
+  if(compareKeys(key, leftKey, keytype) < 0) return leftIndex;
+  else if(compareKeys(key, rightKey, keytype) > 0) return rightIndex + 1;
+  else{
+    while(leftIndex + 1 < rightIndex){
+      currIndex = (leftIndex + rightIndex) / 2;
+      currKey = &(n -> keys[KEY(currIndex)]);
+      if(compareKeys(currKey, key, keytype) == 0){
+	return currIndex;
+      }
+      else if(compareKeys(currKey, key, keytype) < 0){
+	leftIndex = currIndex;
+      }
+      else{
+	rightIndex = currIndex;
+      }
+    }
+    return rightIndex;
+  }
+}
+
 void Index::insert_key_in_node(node * currNode, byte * _key, byte * _data){
-  //FIXED
-  if (currNode -> numKeys == 0){
-    int datasz;
-    add_entry(currNode, _key, _data);
-  }
-  if(DEBUG){
-    cout << "In insert :"<< _data << endl;
-  }
-  int keyIndex;
+  //_data goes to the left of _key in the currNode
   char isLeaf = currNode -> isLeaf;
   int datasz = isLeaf ? payloadLen : OFFSETSIZE;
+  int keyIndex;
   keyIndex = find_next_key(currNode, _key);
-  //XXX keyIndex should be zero when currNode is empty
-  byte * tempKey = new byte[keyLen];
-  memcpy(&(currNode -> data[(currNode -> numKeys + 1)* datasz]),\
-      &(currNode -> data[(currNode -> numKeys) * datasz]), datasz);
+  memcpy(&(currNode -> data[(currNode -> numKeys + 1)* datasz]), &(currNode -> data[(currNode -> numKeys) * datasz]), datasz);
   for(int i = (currNode -> numKeys - 1);i >= keyIndex;i--){
     memcpy(&(currNode -> keys[(i + 1)* keyLen]),&(currNode -> keys[i * keyLen]), keyLen);
     memcpy(&(currNode -> data[(i + 1)* datasz]),&(currNode -> data[i * datasz]), datasz);
   }
-  if(DEBUG){
-    cout << "insert: " << *(int *)_key <<","<< (char *)(_key + 4) << "," << *(int *)(_key + 12) << endl;
-    cout <<"key Index for new data:" << _data << " is : " << keyIndex << endl;
-  }
   memcpy(&(currNode -> keys[keyIndex * keyLen]), _key, keyLen);
   memcpy(&(currNode -> data[keyIndex * datasz]), _data, datasz);
   currNode -> numKeys += 1;
-
   if(currNode -> numKeys == maxKeys){
-    // Create new node at end of file
-
-    // Store data in node construct
-    // Split Node
-    // a. Copy data from current node to new node
-    // b. Update keys count in current node
-    // _key contains first key of newnode
-    // newnode contains
-    // c. Dump new node
+    cout << "I want to split now" << endl;
     node * newNode = NULL;
     byte * newKey;
     newKey = split_node(currNode, &newNode);
+    newNode -> parent = currNode -> parent;
     update_node(&newNode); // Updates node in file
     block_multiple(); //Makes file blocksz multiple
     byte * d = new byte[OFFSETSIZE];
-    memcpy(d, &(newNode -> offset), OFFSETSIZE); //d points to newNode
     //TODO seems currNode->parent is not set
     if(currNode -> parent == NULL){
+      file.seekg(0,ios::end);
       long long int end = file.tellg();
-      create_new_node(end, 0, &currNode->parent); //XXX changed. but not working
-      root = currNode -> parent; //
+      create_new_node(end, 0, &root); //XXX changed. but not working
+      currNode -> parent = root;
+      newNode -> parent = root;
       //set left pointer to point to currNode
-      if(DEBUG){
-	cout <<"kya chutiypa hai" << endl;
-      }
-      memcpy(&(root->data),&(currNode->offset),OFFSETSIZE);
-      if(DEBUG){
-	cout << "chutiyapa " <<endl;
-      }
+      memcpy(root->data,&(newNode->offset),OFFSETSIZE);
+      memcpy(d, &(currNode -> offset), OFFSETSIZE); //d points to newNode
+      cout << "Number of keys at root " << root->numKeys << endl;
+      insert_key_in_node(root, &(currNode -> keys[KEY(0)]) , d);
+      update_node(&root);
+      block_multiple(); //Makes file blocksz multiple
     }
-    insert_key_in_node(currNode -> parent, newKey, d);
+    else{
+      memcpy(d, &(newNode -> offset), OFFSETSIZE); //d points to newNode
+      insert_key_in_node(currNode -> parent, newKey, d);
+    }
+
   }
   update_node(&currNode);
 }
 
 int Index::insert(byte key[], byte payload[]){
-
   assert(file.is_open());
-  if(root -> offset == 0){
-    // Root to be added
-    // Create root node
+  node * currNode = root;
+  // Root DNE
+  if(root -> offset == 0){ // First insert. New root created and made leaf
     create_new_node(BLOCKSIZE, 1, &root);
-    insert_key_in_node(root, key, payload);
-    return 1;
+    currNode = root;
+    update_node(&root);
+    block_multiple();
+    insert_key_in_node(currNode, key, payload);
   }
   // Root exists
-  node * prev, * currNode = root;
-  long long int loc;
-  int currIndex;
-  while(!currNode -> isLeaf){
-    currIndex = find_ptr(currNode, key);
-    loc = *(long long int *) (&currNode -> data[currIndex * OFFSETSIZE]);
-    file.seekg(loc);
-    prev = currNode;
-    currNode = fetchNode(loc);
-    currNode -> parent = prev;
+  else{
+    long long int loc;
+    int currIndex;
+    while(!currNode -> isLeaf){
+      currIndex = find_next_key(currNode, key);
+      loc = *(long long int *) (&currNode -> data[currIndex * OFFSETSIZE]);
+      file.seekg(loc);
+      currNode = fetchNode(loc);
+    }
+    insert_key_in_node(currNode, key, payload);
   }
-  insert_key_in_node(currNode, key, payload); //  1 for leaf
   return 1;
+}
+
+int Index::lookup(byte key[], byte payload[]){
+  if(root -> offset == 0){
+    cout << "No entries in index."<< endl;
+    return 0;
+  }
+  node * curr = root,* prev ;
+  long long int loc;
+  while(!curr -> isLeaf){
+    loc = *(long long int *) (&curr -> data[find_next_key(curr, key) * OFFSETSIZE]); //FIXED
+    file.seekg(loc);
+    curr = fetchNode(loc);
+  }
+  // assert(curr -> isLeaf);
+  int index = find_next_key(curr, key);
+  if (compareKeys(curr->keys + index * payloadLen, key, keytype) != 0)
+    return 0;
+  else{
+    memcpy(payload, &(curr -> data[index * payloadLen]), payloadLen);
+    return 1;
+  }
 }
 
 void Index::closeIndex(){
