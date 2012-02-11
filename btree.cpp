@@ -202,14 +202,15 @@ void Index::create_new_node(long long int _offset, char _isLeaf, node **dst){
   *dst = ret;
 }
 
-// Adds an entry to a node
-void Index::add_entry(node * n, byte * key, byte * payload){
+// Adds an entry to a node . XXX makes it the rightmost entry
+void Index::add_entry(node * n, byte * key, byte * _data){
+  int datasz = (n -> isLeaf)? payloadLen : OFFSETSIZE; //FIXED
   memcpy(&(n -> keys[n -> numKeys * keyLen]), key, keyLen);
   if(n -> isLeaf){
-    memcpy(&(n -> data[n -> numKeys * payloadLen]), payload, payloadLen);
+    memcpy(&(n -> data[n -> numKeys * datasz]), _data, datasz);
   }
   else{
-    memcpy(&(n -> data[n -> numKeys * OFFSETSIZE]), payload, OFFSETSIZE);
+    memcpy(&(n -> data[n -> numKeys * OFFSETSIZE]), _data, OFFSETSIZE);
   }
   n -> numKeys++;
 }
@@ -270,6 +271,11 @@ byte * Index::split_node(node * src, node ** dstp){
 }
 
 void Index::insert_key_in_node(node * currNode, byte * _key, byte * _data){
+  //FIXED
+  if (currNode -> numKeys == 0){
+    int datasz;
+    add_entry(currNode, _key, _data);
+  }
   if(DEBUG){
     cout << "In insert"<< _data << endl;
   }
@@ -329,7 +335,9 @@ void Index::insert_key_in_node(node * currNode, byte * _key, byte * _data){
     memcpy(d, &(newNode -> offset), OFFSETSIZE);
     //TODO seems currNode->parent is not set
     if(currNode -> parent == NULL){
-      create_new_node(BLOCKSIZE, 0, &currNode->parent); //XXX changed. but not working
+      long long int end = file.tellg();
+      create_new_node(end, 0, &currNode->parent); //XXX changed. but not working
+      root = currNode -> parent; //
     }
     insert_key_in_node(currNode -> parent, newKey, d);
   }
