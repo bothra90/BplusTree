@@ -92,7 +92,8 @@ int compareKeys(byte* key1, byte* key2, KeyType* keytype){
     else if (keytype -> attrTypes[i] == stringType){
       int cmp = strcmp((char *)(key1 + offset1), (char *)(key2 + offset2));
       if(DEBUG){
-	cout << (char *)(key1 + offset1) << " " << (char *)(key2 + offset2) << " " << cmp << endl;
+	cout << "string comparison " << (char *)(key1 + offset1) << " " << (char *)(key2 + offset2) << " " << cmp << endl;
+
       }
       if (cmp < 0)
       {

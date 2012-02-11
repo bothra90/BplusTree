@@ -74,7 +74,9 @@ private:
 public:
   int maxKeys;
   /*
-    It constructs an index in a file whose name is specified in indexname. You can assume a fixed directory for all files. The keytype and payloadlen information, along with a pointer to the file offset of the root block of the tree, should be stored as a struct copied into the head of the index. (Note that KeyType is of fixed length.)
+    It constructs an index in a file whose name is specified in indexname. You can assume a fixed directory for all files. The keytype and
+    payloadlen information, along with a pointer to the file offset of the root block of the tree, should be stored as a struct copied into the
+    head of the index. (Note that KeyType is of fixed length.)
   */   
   Index(string _indexname, KeyType * _keytype, int _payloadLen);
   /*
@@ -82,7 +84,10 @@ public:
    */
   Index(string _indexname);
   /*
-    Key comparison should be based on the type of the key specified earlier, and it should be easy to modify your code to add new types. You do NOT have to make this object oriented, you just need a switch on the key type insider your insert/lookup functions.  The index should only support non-duplicate keys. If a key is duplicated, insert should return 0, and not insert the duplicate. Otherwise a value of 1 is returned. */ 
+    Key comparison should be based on the type of the key specified earlier, and it should be easy to modify your code to add new types. You do
+    NOT have to make this object oriented, you just need a switch on the key type insider your insert/lookup functions.  The index should only
+    support non-duplicate keys. If a key is duplicated, insert should return 0, and not insert the duplicate. Otherwise a value of 1 is returned.
+    */ 
   int insert(byte key[], byte payload[]);
   /*
     Payload should be an array of bytes of the required size in which

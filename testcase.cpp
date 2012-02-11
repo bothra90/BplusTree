@@ -25,15 +25,16 @@ int main(){
   Index * foo = new Index("foo",keytype, payloadLen);
   int keylen = keyLength(keytype);
 
+  if(DEBUG){
+    cout << foo->maxKeys << endl;
+  }
+
   byte * key = new byte[keylen];
   char str[] = "this is";
   insert_key(key, 4, 12, str);
   char pay[] = "a";
   foo->insert(key,pay);
 
-  if(DEBUG){
-    cout << foo->maxKeys << endl;
-  }
   byte * key1 = new byte[keylen];
   char str1[] = "awesome";
   insert_key(key1, 4, 12, str1);
@@ -67,11 +68,10 @@ int main(){
 
 /*  cout << "main: " << *(int *)key1 << ","<< *(int *)key <<","<< (char *)(key1 + 4) <<","<<(char *)(key + 4) << ","<<*(int *)(key1 + 12)\
     << "," << *(int *)(key + 12) << endl; */
-  cout << "Comparing in Test" << endl << compareKeys(key2,key3,keytype) << endl;
+  // cout << "Comparing in Test :" << compareKeys(key2,key3,keytype) << endl;
   // cout << (char *)(key1 + 4) << " "<< (char *)(key + 4) << endl;
+/*
   byte * res= new byte;
-  return 0;
-
   foo->lookup(key3,res);
   cout << res[0] << endl;
 
@@ -80,7 +80,7 @@ int main(){
 
   foo->lookup(key5,res);
   cout << res[0] << endl;
-
+*/
   foo->closeIndex();
+  return 0;
 }
-
