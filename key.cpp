@@ -58,10 +58,6 @@ int getStringAttrVal(byte *key, KeyType * keytype, int attrnum, char *retval){
 
 
 int compareKeys(byte* key1, byte* key2, KeyType* keytype){
-
-
-  //test
-  
   if(DEBUG){
     cout << "comparekeys: " << *(int *)key1 << ","<< *(int *)key2 <<","<< (char *)(key1 + 4) <<","<<(char *)(key2 + 4) << ","<<*(int *)(key1 + 12)\
     << "," << *(int *)(key2 + 12) << endl; 

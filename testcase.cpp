@@ -54,17 +54,16 @@ int main(){
   foo->insert(key3,pay3);
 
   byte * key4 = new byte[keylen];
-  char str4[] = "awesom3";
-  insert_key(key4, 1, 42, str4);
+  char str4[] = "awesomg";
+  insert_key(key4, 4, 42, str4);
   char pay4[] = "e";
   foo->insert(key4,pay4);
 
   byte * key5 = new byte[keylen];
   char str5[] = "awesom4";
-  insert_key(key5, 16, 52, str5);
+  insert_key(key5, 4, 52, str5);
   char pay5[] = "f";
   foo->insert(key5,pay5);
-
 
 /*  cout << "main: " << *(int *)key1 << ","<< *(int *)key <<","<< (char *)(key1 + 4) <<","<<(char *)(key + 4) << ","<<*(int *)(key1 + 12)\
     << "," << *(int *)(key + 12) << endl; */
