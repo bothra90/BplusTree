@@ -56,7 +56,8 @@ private:
   fstream file;
   node * root;
   int keyLen;
-
+  int datasz;
+  
   /*Helper Functions*/   
   node * getRoot();
   node * fetchNode(long long int offset);

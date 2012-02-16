@@ -26,44 +26,47 @@ int main(){
   int keylen = keyLength(keytype);
 
   if(DEBUG){
-    cout << foo->maxKeys << endl;
+    cout << "MAXKEYS: " << foo->maxKeys << endl;
   }
 
   byte * key = new byte[keylen];
-  char str[] = "this is";
+  char str[] = "awesom0";
   insert_key(key, 4, 12, str);
   char pay[] = "a";
-  foo->insert(key,pay);
 
   byte * key1 = new byte[keylen];
-  char str1[] = "awesome";
+  char str1[] = "awesom1";
   insert_key(key1, 4, 12, str1);
   char pay1[] = "b";
-  foo->insert(key1,pay1);
 
   byte * key2 = new byte[keylen];
-  char str2[] = "awesom1";
+  char str2[] = "awesom2";
   insert_key(key2, 4, 22, str2);
   char pay2[] = "c";
-  foo->insert(key2,pay2);
 
   byte * key3 = new byte[keylen];
-  char str3[] = "awesom2";
+  char str3[] = "awesom3";
   insert_key(key3, 4, 32, str3);
   char pay3[] = "d";
-  foo->insert(key3,pay3);
 
   byte * key4 = new byte[keylen];
-  char str4[] = "awesomg";
+  char str4[] = "awesom4";
   insert_key(key4, 4, 42, str4);
   char pay4[] = "e";
-  foo->insert(key4,pay4);
 
   byte * key5 = new byte[keylen];
-  char str5[] = "awesom4";
+  char str5[] = "awesom5";
   insert_key(key5, 4, 52, str5);
   char pay5[] = "f";
+
+  /*All database insertions*/ 
+  foo->insert(key,pay);
+  foo->insert(key3,pay3);
+  foo->insert(key1,pay1);
   foo->insert(key5,pay5);
+  foo->insert(key2,pay2);
+  foo->insert(key4,pay4);
+  
 
 /*  cout << "main: " << *(int *)key1 << ","<< *(int *)key <<","<< (char *)(key1 + 4) <<","<<(char *)(key + 4) << ","<<*(int *)(key1 + 12)\
     << "," << *(int *)(key + 12) << endl; */
